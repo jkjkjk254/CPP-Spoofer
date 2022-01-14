@@ -4,6 +4,27 @@
 #include <fstream>
 #include <filesystem>
 #include <urlmon.h>
+#include <windows.h>
+#include <stdio.h>
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <gdiplus.h>
+#include <string>
+#include <fstream>
+#include <WinInet.h>
+#include <random>
+#include <tlhelp32.h>
+#include <conio.h>
+#include <comdef.h>
+#include <tchar.h>
+#include <mmsystem.h>
+#include <CommCtrl.h>
+#include <debugapi.h>
+#include <time.h>
+#include <stdlib.h>
+#include <Shlwapi.h>
+#include <thread>
 #include "XorStr.hpp"
 #pragma comment (lib, "urlmon.lib")
 
